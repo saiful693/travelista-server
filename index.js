@@ -33,6 +33,7 @@ async function run() {
 
     const travelCollection = client.db('travelDB').collection('spot');
     const userCollection = client.db('travelDB').collection('user');
+    const countryCollection=client.db('travelDB').collection('country');
 
     app.get('/spot', async(req, res)=>{
       const cursor=travelCollection.find();
@@ -99,6 +100,13 @@ async function run() {
       const cursor=userCollection.find();
       const result=await cursor.toArray();
       res.send(result);
+    })
+
+    // country
+    app.post('/country', async (req, res) => {
+      const newCountry = req.body;
+      const result = await countryCollection.insertOne(newCountry);
+      res.send(result)
     })
 
 
