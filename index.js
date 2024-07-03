@@ -56,6 +56,38 @@ async function run() {
     })
 
 
+    app.put('/spot/:id', async(req, res) =>{
+      const id=req.params.id;
+      const filter={ _id: new ObjectId(id)}
+      const options = { upsert: true };
+      const updatedSpot=req.body;
+      const spot= {
+          $set: {
+              image: updatedSpot.image,
+              tourists_spot_name:updatedSpot.tourists_spot_name,
+              country_name: updatedSpot.country_name,
+              location: updatedSpot.location,
+              short_description: updatedSpot.short_description,
+              average_cost: updatedSpot.average_cost,
+              seasonality: updatedSpot.seasonality,
+              travel_time: updatedSpot.travel_time,
+              totalVisitorsPerYear: updatedSpot.totalVisitorsPerYear,
+         
+          }
+      }
+      const result=await travelCollection.updateOne(filter, spot, options);
+      res.send(result);
+  })
+
+  app.delete('/spot/:id', async(req, res)=>{
+    const id=req.params.id;
+    const query={_id : new ObjectId(id)}
+    const result=await travelCollection.deleteOne(query);
+    res.send(result);
+})
+
+
+
     // user related api
     app.post('/user', async (req, res) => {
       const user = req.body;
@@ -63,10 +95,9 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/user/:email', async (req, res) => {
-      const {email} = req.params;
-      const query = { email: email};
-      const result = await userCollection.findOne(query);
+    app.get('/user', async (req, res) => {
+      const cursor=userCollection.find();
+      const result=await cursor.toArray();
       res.send(result);
     })
 
