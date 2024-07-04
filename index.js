@@ -11,7 +11,14 @@ const port = process.env.PORT || 5000;
 
 
 //middleware
-app.use(cors());
+// app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173/", "https://travelista-5aafa.web.app/"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 
@@ -29,25 +36,27 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const travelCollection = client.db('travelDB').collection('spot');
     const userCollection = client.db('travelDB').collection('user');
-    const countryCollection=client.db('travelDB').collection('country');
+    const countryCollection = client.db('travelDB').collection('country');
 
-    app.get('/spot', async(req, res)=>{
-      const cursor=travelCollection.find();
-      const result=await cursor.toArray();
+    app.get('/spot', async (req, res) => {
+      const cursor = travelCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     })
 
-    app.get('/spot/:id', async(req,res)=>{
-      const id=req.params.id;
-      const query= { _id: new ObjectId(id)}
-      const result=await travelCollection.findOne(query);
+    app.get('/spot/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await travelCollection.findOne(query);
       res.send(result);
 
-  })
+    })
 
     app.post('/spot', async (req, res) => {
       const newSpot = req.body;
@@ -57,35 +66,41 @@ async function run() {
     })
 
 
-    app.put('/spot/:id', async(req, res) =>{
-      const id=req.params.id;
-      const filter={ _id: new ObjectId(id)}
-      const options = { upsert: true };
-      const updatedSpot=req.body;
-      const spot= {
-          $set: {
-              image: updatedSpot.image,
-              tourists_spot_name:updatedSpot.tourists_spot_name,
-              country_name: updatedSpot.country_name,
-              location: updatedSpot.location,
-              short_description: updatedSpot.short_description,
-              average_cost: updatedSpot.average_cost,
-              seasonality: updatedSpot.seasonality,
-              travel_time: updatedSpot.travel_time,
-              totalVisitorsPerYear: updatedSpot.totalVisitorsPerYear,
-         
-          }
+    app.put('/spot/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id)
       }
-      const result=await travelCollection.updateOne(filter, spot, options);
-      res.send(result);
-  })
+      const options = {
+        upsert: true
+      };
+      const updatedSpot = req.body;
+      const spot = {
+        $set: {
+          image: updatedSpot.image,
+          tourists_spot_name: updatedSpot.tourists_spot_name,
+          country_name: updatedSpot.country_name,
+          location: updatedSpot.location,
+          short_description: updatedSpot.short_description,
+          average_cost: updatedSpot.average_cost,
+          seasonality: updatedSpot.seasonality,
+          travel_time: updatedSpot.travel_time,
+          totalVisitorsPerYear: updatedSpot.totalVisitorsPerYear,
 
-  app.delete('/spot/:id', async(req, res)=>{
-    const id=req.params.id;
-    const query={_id : new ObjectId(id)}
-    const result=await travelCollection.deleteOne(query);
-    res.send(result);
-})
+        }
+      }
+      const result = await travelCollection.updateOne(filter, spot, options);
+      res.send(result);
+    })
+
+    app.delete('/spot/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await travelCollection.deleteOne(query);
+      res.send(result);
+    })
 
 
 
@@ -97,8 +112,8 @@ async function run() {
     });
 
     app.get('/user', async (req, res) => {
-      const cursor=userCollection.find();
-      const result=await cursor.toArray();
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     })
 
@@ -107,6 +122,23 @@ async function run() {
       const newCountry = req.body;
       const result = await countryCollection.insertOne(newCountry);
       res.send(result)
+    })
+
+
+    app.get('/country', async (req, res) => {
+      const cursor = countryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.get('/country/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await countryCollection.findOne(query);
+      res.send(result);
+
     })
 
 
